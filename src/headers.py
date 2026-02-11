@@ -4,7 +4,7 @@ def get_headers_OLX(profile):
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {tokeni_OLX[profile]}",
-        "User-Agent": "Mozilla/5.0"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0"
     }
     return headers
 
@@ -18,13 +18,13 @@ def get_ipon_cookie():
     return cookie_string
 
 tokeni_OLX = {
-    "TechZone" : "32377613|SKFENIY3npMkW8n9r0HEmmSRUJuUbTOO96LbaXyB",
-    "Dado" : "32333933|yeTtVoz2jyHaSP652IzOoriFUxkDxdNXhLQaH05G",
-    "Maksa" : "32334082|AIfl74S8OGqsirgNKFuZr8THQd3S55KTNcW29Vml",
-    "Avram" : "32854058|6wYV0sJKMf6IBMzd5LHPFs9rfkAPBiFlNfaz77Bh",
-    "Vladan" : "32854127|28Fg97D1qfaXECi6qoDWB98lsLHstySWTHVwXywA",
-    "Zoran" : "32854182|nQdjpesEHtlob3dm8peWojl1MxwUwDNC6DiBGiS0",
-    "DrPC" : "32335050|n85KqpvwLosxNEfAFnXOAddRSpCJHxLbV6rY7zpF",
+    "TechZone" : "38862082|xpWSWMV0AFtRuY5orUtIvjaXshhtcbsRgty3Yx3k",
+    # "Dado" : "32333933|yeTtVoz2jyHaSP652IzOoriFUxkDxdNXhLQaH05G",
+    # "Maksa" : "32334082|AIfl74S8OGqsirgNKFuZr8THQd3S55KTNcW29Vml",
+    # "Avram" : "32854058|6wYV0sJKMf6IBMzd5LHPFs9rfkAPBiFlNfaz77Bh",
+    # "Vladan" : "32854127|28Fg97D1qfaXECi6qoDWB98lsLHstySWTHVwXywA",
+    # "Zoran" : "32854182|nQdjpesEHtlob3dm8peWojl1MxwUwDNC6DiBGiS0",
+    # "DrPC" : "32335050|n85KqpvwLosxNEfAFnXOAddRSpCJHxLbV6rY7zpF",
     }
 
 headers_IPON = {

@@ -8,18 +8,40 @@ import math
 #     "User-Agent": "Mozilla/5.0"
 # }
 
-def cena(title, category_id, headers):
+def cena(title, category_id, current_price, headers):
     try:
         oglasi = iscitaj_sve_oglase(title, category_id, headers)
         if not oglasi:
-            print("Po dogovoru")
-            return 0
+            return current_price
         cijena, id_prodavca = najniza_cijena(title, oglasi, category_id)
+        if not id_prodavca:
+            return current_price
         cijena = odredi_nasu_novu_cijenu(cijena, id_prodavca)
         return cijena
     except:
         print("Greska pri racunanju cijene")
-        return 0
+        return current_price
+
+# def iscitaj_sve_oglase(title, category_id, headers):
+#     try:
+#         naziv = title.replace(" ", "+")
+#
+#         if category_id == 1499:
+#             category_id = ""
+#
+#         oglasi = "https://olx.ba/api/search?&attr=&attr_encoded=1&q=" + naziv + "&sort_by=price&sort_order=asc&category_id=" + str(category_id) + "&state=1&page=1&per_page=100"
+#
+#         response = requests.get(oglasi, headers=headers)
+#
+#         if response.status_code != 200:
+#             time.sleep(3)
+#             iscitaj_sve_oglase(title, category_id, headers)
+#
+#         data = response.json()
+#         oglasi = [(oglas["title"], oglas["discounted_price_float"], oglas["user_id"]) for oglas in data["data"]]
+#         return oglasi
+#     except:
+#         time.sleep(2)
 
 def iscitaj_sve_oglase(title, category_id, headers):
     try:
@@ -28,30 +50,70 @@ def iscitaj_sve_oglase(title, category_id, headers):
         if category_id == 1499:
             category_id = ""
 
-        oglasi = "https://olx.ba/api/search?&attr=&attr_encoded=1&q=" + naziv + "&sort_by=price&sort_order=asc&category_id=" + str(category_id) + "&state=1&page=1&per_page=100"
+        base_url = "https://olx.ba/api/search"
 
-        response = requests.get(oglasi, headers=headers)
+        params_common = {
+            "attr": "",
+            "attr_encoded": 1,
+            "q": naziv,
+            "category_id": category_id,
+            "state": 1,
+            "page": 1,
+            "per_page": 100
+        }
 
-        if response.status_code != 200:
-            time.sleep(3)
-            iscitaj_sve_oglase(title, category_id, headers)
+        # 🔼 Rastuće cijene
+        params_asc = params_common.copy()
+        params_asc.update({
+            "sort_by": "price",
+            "sort_order": "asc"
+        })
 
-        data = response.json()
-        oglasi = [(oglas["title"], oglas["discounted_price_float"], oglas["user_id"]) for oglas in data["data"]]
-        return oglasi
-    except:
+        response_asc = requests.get(base_url, headers=headers, params=params_asc)
+        response_asc.raise_for_status()
+
+        data_asc = response_asc.json()
+        oglasi_asc = [
+            (oglas["title"], oglas.get("discounted_price_float"), oglas["user_id"])
+            for oglas in data_asc["data"]
+        ]
+
+        # 🔽 Opadajuće cijene
+        params_desc = params_common.copy()
+        params_desc.update({
+            "sort_by": "price",
+            "sort_order": "desc"
+        })
+
+        response_desc = requests.get(base_url, headers=headers, params=params_desc)
+        response_desc.raise_for_status()
+
+        data_desc = response_desc.json()
+        oglasi_desc = [
+            (oglas["title"], oglas.get("discounted_price_float"), oglas["user_id"])
+            for oglas in data_desc["data"]
+        ]
+
+        return {
+            "rastuce": oglasi_asc,
+            "opadajuce": oglasi_desc
+        }
+
+    except requests.RequestException as e:
+        print("Greška:", e)
         time.sleep(2)
+        return None
 
 
 
 def najniza_cijena(prilagodjen_naziv, oglasi, category_id):
     # Prvo pretrazujemo tudje profile, a ako ne postoji onda pretrazujemo svoje
-    for oglas in oglasi:
+    for oglas in oglasi["rastuce"]:
         naziv_oglasa, cijena, id_prodavca = oglas
-        if (choose_item(category_id, prilagodjen_naziv, naziv_oglasa)) and (id_prodavca in tudji_profili.values()):
+        if (choose_item(category_id, prilagodjen_naziv, naziv_oglasa)) and (id_prodavca in subotica.values()):
             # print(naziv_oglasa)
             return cijena, id_prodavca
-    for oglas in oglasi:
+    for oglas in oglasi["opadajuce"]:
         naziv_oglasa, cijena, id_prodavca = oglas
         if (choose_item(category_id, prilagodjen_naziv, naziv_oglasa)) and (id_prodavca in nasi_profili.values()):
             # print(naziv_oglasa)
@@ -73,10 +135,11 @@ nasi_profili = {
     "BetaTech": 3128221,
     "MaxyShop": 3158396,
     "TargetTech": 3109742,
-    "maksa001": 3452303,
-    "Dado" : 3527815,
+    "CompElite": 3452303,
+    "CompX" : 3527815,
     "DigitalForge" : 798981,    # Vladan
     "AMTechShop" : 1151645,     # Avram
+    "KomponenteEU": 4082244,
 }
 
 tudji_profili = {
@@ -105,6 +168,16 @@ tudji_profili = {
     "ETechShop": 149934,
     "GeekZona": 290226,
     "DejoproTech123": 3756215
+}
+
+subotica = {
+    "SrkiTech": 41785,              # Subotica
+    "TechyBubble": 12728,           # Subotica
+    "LuxTehnika": 328356,           # Subotica
+    "SvetTehnike": 59418,           # Subotica
+    "DigitalTech": 39288,           # Subotica
+    "GeekZona": 290226,             # Subotica
+    "ELEKTRO_VUCKO" : 64096278,     # Subotica
 }
 
 svi_profili = nasi_profili | tudji_profili

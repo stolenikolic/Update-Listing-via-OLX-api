@@ -10,9 +10,14 @@ def all_products(API_LINK, headers, start_page=1, all_products=[]):
             break
 
         url = API_LINK + str(start_page)
-        response = requests.get(url, headers=headers)
-        data = response.json()
-        items = data.get("data", [])
+        if len(all_products) <= 9999:
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            items = data.get("data", [])
+        else:
+            with open("products.json", "w", encoding="utf-8") as f:
+                json.dump(all_products, f, ensure_ascii=False, indent=2)
+            break
 
         if len(data['data']) == 0:
             with open("products.json", "w", encoding="utf-8") as f:
@@ -24,6 +29,7 @@ def all_products(API_LINK, headers, start_page=1, all_products=[]):
                 "id_artikla": item.get("id"),
                 "title" : item.get("title"),
                 "category_id": item.get("category_id"),
+                "current_price": item.get("discounted_price_float"),
             }
             all_products.append(product)
         start_page += 1
